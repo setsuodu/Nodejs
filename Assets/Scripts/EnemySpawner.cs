@@ -38,7 +38,9 @@ public class EnemySpawner : MonoBehaviour
             PlayerController pc = newEnemy.GetComponent<PlayerController>();
             pc.isLocalPlayer = false;
             Health h = newEnemy.GetComponent<Health>();
-            //h.OnChangeHealth();
+            h.currentHealth = 100;
+            h.OnChangeHealth();
+            h.destroyOnDeath = true;
             h.isEnemy = true;
             i++;
         }

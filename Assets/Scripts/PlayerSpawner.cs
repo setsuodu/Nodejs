@@ -4,12 +4,15 @@ using UnityEngine;
 
 public class PlayerSpawner : MonoBehaviour
 {
+    public List<SpawnPoint> playerSpawnPoints;
 
-	void Start () {
+	void Start ()
+    {
 		
 	}
 	
-	void Update () {
+	void Update ()
+    {
 		
 	}
 }
