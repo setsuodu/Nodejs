@@ -18,8 +18,8 @@ io.on('connection', function(socket){
 	var currentPlayer = {};
 	currentPlayer.name = 'unknown';
 
-	socket.on('player connect',function(){
-		console.log(currentPlayer.name + 'recv: player connect');
+	socket.on('other player connected',function(){
+		console.log(currentPlayer.name + 'recv: other player connect');
 		for(var i = 0; i < clients.length; i++){
 			var playerConnected = {
 				name:clients[i].name,
@@ -29,7 +29,7 @@ io.on('connection', function(socket){
 			};
 			// in your current game, we need to tell you about the other players.
 			socket.emit('other player connected', playerConnected);
-			console.log(curr.name + 'emit: other player connected: ' + JSON.stringify(playerConnected));
+			console.log(currentPlayer.name + 'emit: other player connected: ' + JSON.stringify(playerConnected));
 		}
 	});
 	/*
@@ -39,7 +39,7 @@ io.on('connection', function(socket){
 	});
 	*/
 	socket.on('play',function(data){
-		console.log(curr.name + ' recv:play: ' + JSON.stringify(data));
+		console.log(currentPlayer.name + ' recv:play: ' + JSON.stringify(data));
 		// if this is the first person to join the game init the enemies
 		if(clients.length === 0){
 			numberOfEnemies = data.enemySpawnPoints.length;
