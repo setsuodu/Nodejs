@@ -30,14 +30,14 @@ public class NetworkManager : MonoBehaviour
     {
         // TODO subscription
         // subscribe to all the various websocket events
-        socket.On("enemies", OnEnemies);
         socket.On("other player connected", OnOtherPlayerConnected);
         socket.On("play", OnPlay);
+        socket.On("enemies", OnEnemies);
         socket.On("player move", OnPlayerMove);
         socket.On("player turn", OnPlayerTurn);
         socket.On("player shoot", OnPlayerShoot);
         socket.On("health", OnHealth);
-        socket.On("other player disconnected", OnOtherPlayerDisconnected);
+        socket.On("disconnect", OnOtherPlayerDisconnected);
     }
 	
 	public void JoinGame ()
@@ -62,6 +62,18 @@ public class NetworkManager : MonoBehaviour
         string data = JsonUtility.ToJson(playerJSON);
         socket.Emit("play", new JSONObject(data));
         canvas.gameObject.SetActive(false); // 取名后关闭UICanvas
+    }
+
+    public void CommandMove(Vector3 vec3)
+    {
+        string data = JsonUtility.ToJson(new PositionJSON(vec3));
+        socket.Emit("player move", new JSONObject(data));
+    }
+
+    public void CommandTurn(Quaternion quat)
+    {
+        string data = JsonUtility.ToJson(new RotationJSON(quat));
+        socket.Emit("player turn", new JSONObject(data));
     }
 
     #endregion
@@ -91,7 +103,7 @@ public class NetworkManager : MonoBehaviour
         GameObject p = Instantiate(player, position, rotation)as GameObject;
         // here we are setting up their other fields name and if they are local
         PlayerController pc = p.GetComponent<PlayerController>();
-        Transform t = p.transform.Find("Healthbar Canvas");
+        Transform t = p.transform.Find("Health Canvas");
         Transform t1 = t.transform.Find("Player Name");
         Text playerName = t1.GetComponent<Text>();
         playerName.text = userJSON.name;
@@ -101,7 +113,6 @@ public class NetworkManager : MonoBehaviour
         Health h = p.GetComponent<Health>();
         h.currentHealth = userJSON.health;
         h.OnChangeHealth();
-        Debug.Log("OnOtherPlayerConnected");
     }
 
     void OnPlay(SocketIOEvent socketIOEvent)
@@ -114,24 +125,49 @@ public class NetworkManager : MonoBehaviour
         //GameObject p = GameObject.Find(currentUserJSON.name) as GameObject;
         GameObject p = Instantiate(player, position, rotation) as GameObject;
         PlayerController pc = p.GetComponent<PlayerController>();
-        Transform t = p.transform.Find("Healthbar Canvas");
+        Transform t = p.transform.Find("Health Canvas");
         Transform t1 = t.transform.Find("Player Name");
         Text playerName = t1.GetComponent<Text>();
         playerName.text = currentUserJSON.name;
+
         pc.isLocalPlayer = true;
         p.name = currentUserJSON.name;
-        Debug.Log("OnPlay");
     }
 
     void OnPlayerMove(SocketIOEvent socketIOEvent)
     {
-
+        string data = socketIOEvent.data.ToString();
+        UserJSON userJSON = UserJSON.CreateFromJSON(data);
+        Vector3 position = new Vector3(userJSON.position[0], userJSON.position[1], userJSON.position[2]);
+        // if it is the current player exit
+        if (userJSON.name == playerNameInput.text)
+        {
+            return;
+        }
+        GameObject p = GameObject.Find(userJSON.name) as GameObject;
+        if (p != null)
+        {
+            p.transform.position = position;
+        }
     }
 
     void OnPlayerTurn(SocketIOEvent socketIOEvent)
     {
-
+        string data = socketIOEvent.data.ToString();
+        UserJSON userJSON = UserJSON.CreateFromJSON(data);
+        Quaternion rotation = Quaternion.Euler(userJSON.rotation[0], userJSON.rotation[1], userJSON.rotation[2]);
+        // if it is the current player exit
+        if (userJSON.name == playerNameInput.text)
+        {
+            return;
+        }
+        GameObject p = GameObject.Find(userJSON.name) as GameObject;
+        if (p != null)
+        {
+            p.transform.rotation = rotation;
+        }
     }
+
     void OnPlayerShoot(SocketIOEvent socketIOEvent)
     {
 
@@ -144,7 +180,10 @@ public class NetworkManager : MonoBehaviour
 
     void OnOtherPlayerDisconnected(SocketIOEvent socketIOEvent)
     {
-
+        Debug.Log("OnOtherPlayerDisconnected");
+        string data = socketIOEvent.data.ToString();
+        UserJSON userJson = UserJSON.CreateFromJSON(data);
+        Destroy(GameObject.Find(userJson.name));
     }
 
     #endregion
@@ -189,9 +228,9 @@ public class NetworkManager : MonoBehaviour
                 spawnPoint.transform.position.z
             };
             rotation = new float[]{
-            spawnPoint.transform.eulerAngles.x,
-            spawnPoint.transform.eulerAngles.y,
-            spawnPoint.transform.eulerAngles.z
+                spawnPoint.transform.eulerAngles.x,
+                spawnPoint.transform.eulerAngles.y,
+                spawnPoint.transform.eulerAngles.z
             };
         }
     }

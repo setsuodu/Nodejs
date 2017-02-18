@@ -6,7 +6,7 @@ public class PlayerController : MonoBehaviour
 {
     public GameObject bulletPrefab;
     public Transform bulletSpawn;
-    public bool isLocalPlayer = true; //TODO switch back when networking
+    public bool isLocalPlayer = false; //TODO switch back when networking
 
     Vector3 oldPosition;
     Vector3 currentPosition;
@@ -37,12 +37,14 @@ public class PlayerController : MonoBehaviour
         if (currentPosition != oldPosition)
         {
             //TODO Networking
+            NetworkManager.instance.GetComponent<NetworkManager>().CommandMove(transform.position);
             oldPosition = currentPosition;
         }
 
         if (currentRotation != oldRotation)
         {
             //TODO Networking
+            NetworkManager.instance.GetComponent<NetworkManager>().CommandTurn(transform.rotation);
             oldRotation = currentRotation;
         }
 
