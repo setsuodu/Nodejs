@@ -6,11 +6,6 @@ public class Bullet : MonoBehaviour
 {
     [HideInInspector]
     public GameObject playerFrom;
-
-	void Start ()
-    {
-		
-	}
 	
 	void OnCollisionEnter(Collision collision)
     {
@@ -18,7 +13,7 @@ public class Bullet : MonoBehaviour
         Health health = hit.GetComponent<Health>();
         if (health != null)
         {
-            health.TakeDamage(hit, 10);
+            health.TakeDamage(playerFrom, 10);
         }
         Destroy(gameObject);
     }

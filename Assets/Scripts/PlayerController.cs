@@ -13,23 +13,23 @@ public class PlayerController : MonoBehaviour
     Quaternion oldRotation;
     Quaternion currentRotation;
 
-	void Start ()
+    void Start()
     {
         oldPosition = transform.position;
         currentPosition = oldPosition;
         oldRotation = transform.rotation;
         currentRotation = oldRotation;
     }
-	
-	void Update ()
+
+    void Update()
     {
         if (!isLocalPlayer) return;
 
         var x = Input.GetAxis("Horizontal") * Time.deltaTime * 150.0f;
         var z = Input.GetAxis("Vertical") * Time.deltaTime * 3.0f;
 
-        transform.Rotate(0,x,0);
-        transform.Translate(0,0,z);
+        transform.Rotate(0, x, 0);
+        transform.Translate(0, 0, z);
 
         currentPosition = transform.position;
         currentRotation = transform.rotation;
@@ -51,16 +51,16 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             //TODO Networking
-            //n.CommandShoot();
-            CmdFire();
+            NetworkManager n = NetworkManager.instance.GetComponent<NetworkManager>();
+            n.CommandShoot();
         }
     }
 
     public void CmdFire()
     {
-        GameObject bullet = Instantiate(bulletPrefab,bulletSpawn.position,bulletSpawn.rotation) as GameObject;
+        GameObject bullet = Instantiate(bulletPrefab, bulletSpawn.position, bulletSpawn.rotation) as GameObject;
         Bullet b = bullet.GetComponent<Bullet>();
-        //b.playerFrom = this.gameObject;
+        b.playerFrom = this.gameObject;
         b.GetComponent<Rigidbody>().velocity = bullet.transform.up * 6;
         Destroy(bullet, 2.0f);
     }

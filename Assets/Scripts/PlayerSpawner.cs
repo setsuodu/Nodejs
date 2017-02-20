@@ -10,9 +10,4 @@ public class PlayerSpawner : MonoBehaviour
     {
 		
 	}
-	
-	void Update ()
-    {
-		
-	}
 }

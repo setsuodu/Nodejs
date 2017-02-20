@@ -30,14 +30,14 @@ public class NetworkManager : MonoBehaviour
     {
         // TODO subscription
         // subscribe to all the various websocket events
-        socket.On("other player connected", OnOtherPlayerConnected);
         socket.On("play", OnPlay);
-        socket.On("enemies", OnEnemies);
+        socket.On("enemies", OnEnemies); //要放在localplayer创建之后执行，否则后面上线的客户端没有前面的信息传入
+        socket.On("other player connected", OnOtherPlayerConnected); //要放在localplayer创建之后执行
         socket.On("player move", OnPlayerMove);
         socket.On("player turn", OnPlayerTurn);
         socket.On("player shoot", OnPlayerShoot);
         socket.On("health", OnHealth);
-        socket.On("disconnect", OnOtherPlayerDisconnected);
+        socket.On("other player disconnected", OnOtherPlayerDisconnected);
     }
 	
 	public void JoinGame ()
@@ -58,7 +58,7 @@ public class NetworkManager : MonoBehaviour
         string playerName = playerNameInput.text;
         List<SpawnPoint> playerSpawnPoints = GetComponent<PlayerSpawner>().playerSpawnPoints;
         List<SpawnPoint> enemySpawnPoints = GetComponent<EnemySpawner>().enemySpawnPoints;
-        PlayerJSON playerJSON = new PlayerJSON(playerName, playerSpawnPoints,enemySpawnPoints);
+        PlayerJSON playerJSON = new PlayerJSON(playerName, playerSpawnPoints, enemySpawnPoints);
         string data = JsonUtility.ToJson(playerJSON);
         socket.Emit("play", new JSONObject(data));
         canvas.gameObject.SetActive(false); // 取名后关闭UICanvas
@@ -76,6 +76,18 @@ public class NetworkManager : MonoBehaviour
         socket.Emit("player turn", new JSONObject(data));
     }
 
+    public void CommandShoot()
+    {
+        Debug.Log("shoot");
+        socket.Emit("player shoot");
+    }
+
+    public void CommandHealthChange(GameObject playerFrom, GameObject playerTo, int healthChange, bool isEnemy)
+    {
+        Debug.Log("health change cmd");
+        HealthChangeJSON healthChangeJSON = new HealthChangeJSON(playerTo.name, healthChange, playerFrom.name,isEnemy);
+        socket.Emit("health",new JSONObject(JsonUtility.ToJson(healthChangeJSON)));
+    }
     #endregion
 
     #region Listening
@@ -129,7 +141,6 @@ public class NetworkManager : MonoBehaviour
         Transform t1 = t.transform.Find("Player Name");
         Text playerName = t1.GetComponent<Text>();
         playerName.text = currentUserJSON.name;
-
         pc.isLocalPlayer = true;
         p.name = currentUserJSON.name;
     }
@@ -170,12 +181,25 @@ public class NetworkManager : MonoBehaviour
 
     void OnPlayerShoot(SocketIOEvent socketIOEvent)
     {
-
+        string data = socketIOEvent.data.ToString();
+        ShootJSON shootJSON = ShootJSON.CreateFromJSON(data);
+        // find the gameobject
+        GameObject p = GameObject.Find(shootJSON.name);
+        // instanciate the bullet etc from the player script
+        PlayerController pc = p.GetComponent<PlayerController>();
+        pc.CmdFire();
     }
 
     void OnHealth(SocketIOEvent socketIOEvent)
     {
-
+        Debug.Log("changing the health");
+        // get the name of the player whose health changed
+        string data = socketIOEvent.data.ToString();
+        UserHealthJSON userHealthJSON = UserHealthJSON.CreateFromJSON(data);
+        GameObject p = GameObject.Find(userHealthJSON.name);
+        Health h = p.GetComponent<Health>();
+        h.currentHealth = userHealthJSON.health;
+        h.OnChangeHealth();
     }
 
     void OnOtherPlayerDisconnected(SocketIOEvent socketIOEvent)
@@ -288,11 +312,8 @@ public class NetworkManager : MonoBehaviour
     [Serializable]
     public class EnemiesJSON
     {
-        public string name;
-        public float[] position;
-        public float[] rotation;
-        public int health;
         public List<UserJSON> enemies;
+
         public static EnemiesJSON CreateFromJSON(string data)
         {
             return JsonUtility.FromJson<EnemiesJSON>(data);

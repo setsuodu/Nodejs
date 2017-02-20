@@ -22,7 +22,6 @@ public class EnemySpawner : MonoBehaviour
                                                       spawnRotation) as GameObject).GetComponent<SpawnPoint>();
             enemySpawnPoints.Add(enemySpawnPoint);
         }
-        //SpawnEnemies();
     }
 	
 	public void SpawnEnemies(NetworkManager.EnemiesJSON enemiesJSON) //TODO networking
@@ -30,10 +29,15 @@ public class EnemySpawner : MonoBehaviour
         //TODO
         foreach (NetworkManager.UserJSON enemyJSON in enemiesJSON.enemies)
         {
+            Debug.Log(enemyJSON.health);
+            if (enemyJSON.health <= 0) //修复Client1打死的怪，Client2上线时还存在的bug
+            {
+                continue;
+            }
             Vector3 position = new Vector3(enemyJSON.position[0], enemyJSON.position[1], enemyJSON.position[2]);
             Quaternion rotation = Quaternion.Euler(enemyJSON.rotation[0], enemyJSON.rotation[1], enemyJSON.rotation[2]);
             GameObject newEnemy = Instantiate(enemy, position, rotation) as GameObject;
-            enemy.name = enemyJSON.name;
+            newEnemy.name = enemyJSON.name;
             PlayerController pc = newEnemy.GetComponent<PlayerController>();
             pc.isLocalPlayer = false;
             Health h = newEnemy.GetComponent<Health>();
