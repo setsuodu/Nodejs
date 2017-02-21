@@ -82,6 +82,8 @@ io.on('connection', function(socket){
 		socket.emit('play', currentPlayer);
 		// in your current game, we need to tell the other players about you.
 		socket.broadcast.emit('other player connected', currentPlayer);
+		
+		console.log("在线用户 " + clients.length);
 	});
 	
 	socket.on('player move',function(data){
@@ -148,6 +150,7 @@ io.on('connection', function(socket){
 				clients.splice(i,1);
 			}
 		}
+		console.log("在线用户 " + clients.length);
 	});
 
 });
@@ -159,4 +162,12 @@ function guid(){
 		return Math.floor((1+Math.random()) * 0x10000).toString(16).substring(1);
 	}
 	return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+}
+
+//不能直接取负值，通过扩大两倍，减负数部分范围算出要的值
+function rand(){
+	function pos(){
+		return Math.random() * 0.8 - 0.4;
+	}
+	return pos() + ',' + pos();
 }
