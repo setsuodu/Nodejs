@@ -10,7 +10,8 @@ public class NetworkManager : MonoBehaviour
     public static NetworkManager instance;
     public Canvas canvas;
     public SocketIOComponent socket;
-    public InputField playerNameInput;
+    public InputField playerNameInput, chatContent;
+    public Text contentHistroy;
     public GameObject player;
 
     void Awake()
@@ -37,6 +38,7 @@ public class NetworkManager : MonoBehaviour
         socket.On("player turn", OnPlayerTurn);
         socket.On("player shoot", OnPlayerShoot);
         socket.On("health", OnHealth);
+        socket.On("chat", OnChat);
         socket.On("other player disconnected", OnOtherPlayerDisconnected);
     }
 	
@@ -88,6 +90,16 @@ public class NetworkManager : MonoBehaviour
         HealthChangeJSON healthChangeJSON = new HealthChangeJSON(playerTo.name, healthChange, playerFrom.name,isEnemy);
         socket.Emit("health",new JSONObject(JsonUtility.ToJson(healthChangeJSON)));
     }
+
+    private GameObject playerFrom;
+    public void CommandChatMessage()
+    {
+        Debug.Log("chat message cmd");
+        Debug.Log(playerFrom.name);
+        ChatMessageJSON chatMessageJSON = new ChatMessageJSON(playerFrom.name, chatContent.text);
+        socket.Emit("chat", new JSONObject(JsonUtility.ToJson(chatMessageJSON)));
+        chatContent.text = "";
+    }
     #endregion
 
     #region Listening
@@ -136,6 +148,7 @@ public class NetworkManager : MonoBehaviour
         Quaternion rotation = Quaternion.Euler(currentUserJSON.rotation[0], currentUserJSON.rotation[1], currentUserJSON.rotation[2]);
         //GameObject p = GameObject.Find(currentUserJSON.name) as GameObject;
         GameObject p = Instantiate(player, position, rotation) as GameObject;
+        playerFrom = p;
         PlayerController pc = p.GetComponent<PlayerController>();
         Transform t = p.transform.Find("Health Canvas");
         Transform t1 = t.transform.Find("Player Name");
@@ -147,6 +160,7 @@ public class NetworkManager : MonoBehaviour
 
     void OnPlayerMove(SocketIOEvent socketIOEvent)
     {
+        Debug.Log("Moving");
         string data = socketIOEvent.data.ToString();
         UserJSON userJSON = UserJSON.CreateFromJSON(data);
         Vector3 position = new Vector3(userJSON.position[0], userJSON.position[1], userJSON.position[2]);
@@ -200,6 +214,18 @@ public class NetworkManager : MonoBehaviour
         Health h = p.GetComponent<Health>();
         h.currentHealth = userHealthJSON.health;
         h.OnChangeHealth();
+    }
+
+    void OnChat(SocketIOEvent socketIOEvent)
+    {
+        Debug.Log("get chat content");
+        // get the name of the player whose send message
+        string data = socketIOEvent.data.ToString();
+        ChatJSON chatJSON = ChatJSON.CreateFromJSON(data);
+
+        Debug.Log(chatJSON.name);
+        Debug.Log(chatJSON.message);
+        contentHistroy.text += "\n" + chatJSON.name + " 说: "+ chatJSON.message;
     }
 
     void OnOtherPlayerDisconnected(SocketIOEvent socketIOEvent)
@@ -310,6 +336,19 @@ public class NetworkManager : MonoBehaviour
     }
 
     [Serializable]
+    public class ChatMessageJSON
+    {
+        public string from;
+        public string message;
+
+        public ChatMessageJSON(string _from, string _message)
+        {
+            from = _from;
+            message = _message;
+        }
+    }
+
+    [Serializable]
     public class EnemiesJSON
     {
         public List<UserJSON> enemies;
@@ -342,5 +381,16 @@ public class NetworkManager : MonoBehaviour
         }
     }
 
+    [Serializable]
+    public class ChatJSON
+    {
+        public string name;
+        public string message;
+
+        public static ChatJSON CreateFromJSON(string data)
+        {
+            return JsonUtility.FromJson<ChatJSON>(data);
+        }
+    }
     #endregion
 }

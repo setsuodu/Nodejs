@@ -19,7 +19,7 @@ io.on('connection', function(socket){
 	currentPlayer.name = 'unknown';
 
 	socket.on('player connect',function(){
-		console.log(currentPlayer.name+' recv: player connect');
+		console.log(currentPlayer.name +' recv: player connect');
 		for(var i = 0; i < clients.length; i++){
 			var playerConnected = {
 				name:clients[i].name,
@@ -111,19 +111,27 @@ io.on('connection', function(socket){
 	socket.on('health',function(data){
 		console.log(currentPlayer.name+' recv: health: '+JSON.stringify(data));
 		// only change the health once, we can do this by checking the originating player
-		if(data.from === currentPlayer.name){
+		if(data.from === currentPlayer.name)
+		{
 			var indexDamaged = 0;
-			if(!data.isEnemy) {
-				clients = clients.map(function(client, index) {
-					if(client.name === data.name){
+			if(!data.isEnemy) 
+			{
+				clients = clients.map(function(client, index) 
+				{
+					if(client.name === data.name)
+					{
 						indexDamaged = index;
 						client.health -= data.healthChange;
 					}
 					return client;
 				});
-			} else {
-				enemies = enemies.map(function(enemy, index) {
-					if(enemy.name === data.name) {
+			}
+			else 
+			{
+				enemies = enemies.map(function(enemy, index) 
+				{
+					if(enemy.name === data.name) 
+					{
 						indexDamaged = index;
 						enemy.health -= data.healthChange;
 					}
@@ -131,13 +139,28 @@ io.on('connection', function(socket){
 				});
 			}
 
-			var response = {
+			var response = 
+			{
 				name: (!data.isEnemy) ? clients[indexDamaged].name : enemies[indexDamaged].name,
 				health: (!data.isEnemy) ? clients[indexDamaged].health : enemies[indexDamaged].health,
 			};
 			console.log(currentPlayer.name+' bcst: health: '+JSON.stringify(response));
 			socket.emit('health',response);
 			socket.broadcast.emit('health',response);
+		}
+	});
+
+	socket.on('chat',function(data){
+		console.log(currentPlayer.name +' recv: message: '+JSON.stringify(data));
+		if(data.from === currentPlayer.name)
+		{
+			console.log(' ===yes=== ');
+			var response = {
+				name: currentPlayer.name,
+				message: data.message,
+			};
+			socket.emit('chat', response);
+			socket.broadcast.emit('chat',response);
 		}
 	});
 
