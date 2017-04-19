@@ -91,14 +91,33 @@ public class NetworkManager : MonoBehaviour
         socket.Emit("health",new JSONObject(JsonUtility.ToJson(healthChangeJSON)));
     }
 
-    private GameObject playerFrom;
+    private GameObject playerFrom, playerTo;
     public void CommandChatMessage()
     {
-        Debug.Log("chat message cmd");
-        Debug.Log(playerFrom.name);
-        ChatMessageJSON chatMessageJSON = new ChatMessageJSON(playerFrom.name, chatContent.text);
+        if(!playerTo)
+            playerTo = playerFrom.gameObject;
+        Debug.Log(playerFrom.name + " 对 " + playerTo.name + " 说");
+        ChatMessageJSON chatMessageJSON = new ChatMessageJSON(playerFrom.name, playerTo.name, chatContent.text);
         socket.Emit("chat", new JSONObject(JsonUtility.ToJson(chatMessageJSON)));
         chatContent.text = "";
+    }
+
+    void Update()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            RaycastHit hit;
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+            if (Physics.Raycast(ray, out hit))
+            {
+                if (hit.collider.tag == "Player")
+                {
+                    Debug.Log("Hit");
+                    playerTo = hit.transform.gameObject;
+                }
+            }
+        }
     }
     #endregion
 
@@ -160,7 +179,6 @@ public class NetworkManager : MonoBehaviour
 
     void OnPlayerMove(SocketIOEvent socketIOEvent)
     {
-        Debug.Log("Moving");
         string data = socketIOEvent.data.ToString();
         UserJSON userJSON = UserJSON.CreateFromJSON(data);
         Vector3 position = new Vector3(userJSON.position[0], userJSON.position[1], userJSON.position[2]);
@@ -223,9 +241,10 @@ public class NetworkManager : MonoBehaviour
         string data = socketIOEvent.data.ToString();
         ChatJSON chatJSON = ChatJSON.CreateFromJSON(data);
 
-        Debug.Log(chatJSON.name);
+        Debug.Log(chatJSON.from);
+        Debug.Log(chatJSON.to);
         Debug.Log(chatJSON.message);
-        contentHistroy.text += "\n" + chatJSON.name + " 说: "+ chatJSON.message;
+        contentHistroy.text += "\n" + chatJSON.from + " 对 " + chatJSON.to + " 说: "+ chatJSON.message;
     }
 
     void OnOtherPlayerDisconnected(SocketIOEvent socketIOEvent)
@@ -339,11 +358,13 @@ public class NetworkManager : MonoBehaviour
     public class ChatMessageJSON
     {
         public string from;
+        public string to;
         public string message;
 
-        public ChatMessageJSON(string _from, string _message)
+        public ChatMessageJSON(string _from, string _to, string _message)
         {
             from = _from;
+            to = _to;
             message = _message;
         }
     }
@@ -384,7 +405,8 @@ public class NetworkManager : MonoBehaviour
     [Serializable]
     public class ChatJSON
     {
-        public string name;
+        public string from;
+        public string to;
         public string message;
 
         public static ChatJSON CreateFromJSON(string data)

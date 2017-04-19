@@ -1,6 +1,7 @@
 var app = require('express')();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
+var MySQL = require('mysql');
 
 server.listen(3000);
 
@@ -18,7 +19,15 @@ io.on('connection', function(socket){
 	var currentPlayer = {};
 	currentPlayer.name = 'unknown';
 
-	socket.on('player connect',function(){
+	/*带Log写法
+	socket.join('237', function(){
+    	console.log('rooms: ' + socket.rooms); // [ <socket.id>, 'room 237' ]
+    	io.to('237', 'a new user has joined the room'); // broadcast to everyone in the room
+    });
+	*/
+
+	socket.on('player connect',function()
+	{
 		console.log(currentPlayer.name +' recv: player connect');
 		for(var i = 0; i < clients.length; i++){
 			var playerConnected = {
@@ -84,6 +93,9 @@ io.on('connection', function(socket){
 		socket.broadcast.emit('other player connected', currentPlayer);
 		
 		console.log("在线用户 " + clients.length);
+
+		//附上名字，用于私聊
+		socket.name = currentPlayer.name;
 	});
 	
 	socket.on('player move',function(data){
@@ -114,7 +126,7 @@ io.on('connection', function(socket){
 		if(data.from === currentPlayer.name)
 		{
 			var indexDamaged = 0;
-			if(!data.isEnemy) 
+			if(!data.isEnemy)
 			{
 				clients = clients.map(function(client, index) 
 				{
@@ -138,9 +150,7 @@ io.on('connection', function(socket){
 					return enemy;
 				});
 			}
-
-			var response = 
-			{
+			var response = {
 				name: (!data.isEnemy) ? clients[indexDamaged].name : enemies[indexDamaged].name,
 				health: (!data.isEnemy) ? clients[indexDamaged].health : enemies[indexDamaged].health,
 			};
@@ -150,17 +160,25 @@ io.on('connection', function(socket){
 		}
 	});
 
-	socket.on('chat',function(data){
+	socket.on('chat',function(data)
+	{
 		console.log(currentPlayer.name +' recv: message: '+JSON.stringify(data));
+		console.log('id: ' + socket.id + ', name ' + socket.name);
+		
+		socket.join(data.from + data.to);
+		socket.join(data.to + data.from);
+
 		if(data.from === currentPlayer.name)
 		{
 			console.log(' ===yes=== ');
 			var response = {
-				name: currentPlayer.name,
+				from: data.from,
+				to: data.to,
 				message: data.message,
 			};
-			socket.emit('chat', response);
-			socket.broadcast.emit('chat',response);
+			socket.emit('chat', response); //仅发送者自己可见
+			//socket.broadcast.emit('chat',response); //除了发送者自己，全体可见
+			socket.broadcast.to(data.from + data.to).to(data.to + data.from).emit('chat',response); //创建了2个room，这里还存在问题
 		}
 	});
 

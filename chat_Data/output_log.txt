@@ -15,7 +15,7 @@ Platform assembly: D:\Nodejs\chat_Data\Managed\UnityEngine.UI.dll (this message 
 Loading D:\Nodejs\chat_Data\Managed\UnityEngine.UI.dll into Unity Child Domain
 Platform assembly: D:\Nodejs\chat_Data\Managed\UnityEngine.Networking.dll (this message is harmless)
 Loading D:\Nodejs\chat_Data\Managed\UnityEngine.Networking.dll into Unity Child Domain
-- Completed reload, in  0.016 seconds
+- Completed reload, in  0.017 seconds
 Platform assembly: D:\Nodejs\chat_Data\Managed\System.Core.dll (this message is harmless)
 Platform assembly: D:\Nodejs\chat_Data\Managed\System.dll (this message is harmless)
 Platform assembly: D:\Nodejs\chat_Data\Managed\Mono.Security.dll (this message is harmless)
@@ -23,16 +23,12 @@ desktop: 1920x1080 60Hz; virtual: 1920x1080 at 0,0
 <RI> Initializing input.
 <RI> Input initialized.
 <RI> Initialized touch support.
-UnloadTime: 3.332803 ms
+UnloadTime: 1.736711 ms
 Setting up 4 worker threads for Enlighten.
-  Thread -> id: 5638 -> priority: 1 
-  Thread -> id: 563c -> priority: 1 
-  Thread -> id: 5644 -> priority: 1 
-  Thread -> id: 5640 -> priority: 1 
-Someone else joined
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
+  Thread -> id: 7598 -> priority: 1 
+  Thread -> id: 759c -> priority: 1 
+  Thread -> id: 74fc -> priority: 1 
+  Thread -> id: 75a8 -> priority: 1 
 Someone else joined
  
 (Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
@@ -61,11 +57,7 @@ you joined
  
 (Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
 
-chat message cmd
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-haha
+seol 对 s 说
  
 (Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
 
@@ -73,23 +65,15 @@ get chat content
  
 (Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
 
-haha
+s
  
 (Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
 
-你好啊
+seol
  
 (Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
 
-get chat content
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-player1
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-你好
+....
  
 (Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
 
@@ -97,11 +81,19 @@ get chat content
  
 (Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
 
-player1
+s
  
 (Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
 
-++++
+seol
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+dsawrq
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+seol 对 s 说
  
 (Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
 
