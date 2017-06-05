@@ -91,14 +91,17 @@ public class NetworkManager : MonoBehaviour
         socket.Emit("health",new JSONObject(JsonUtility.ToJson(healthChangeJSON)));
     }
 
-    private GameObject playerFrom, playerTo;
+    public GameObject playerFrom, playerTo;
     public void CommandChatMessage()
     {
-        if(!playerTo)
+        if(playerTo == null)
             playerTo = playerFrom.gameObject;
+
         Debug.Log(playerFrom.name + " 对 " + playerTo.name + " 说");
+
         ChatMessageJSON chatMessageJSON = new ChatMessageJSON(playerFrom.name, playerTo.name, chatContent.text);
         socket.Emit("chat", new JSONObject(JsonUtility.ToJson(chatMessageJSON)));
+
         chatContent.text = "";
     }
 

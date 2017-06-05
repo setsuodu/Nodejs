@@ -9,6 +9,7 @@ server.listen(3000);
 var enemies = [];
 var playerSpawnPoints = [];
 var clients = [];
+var basket = [];
 
 app.get('/',function(req,res){
 	res.send('hey you got back get "/"');
@@ -18,13 +19,6 @@ io.on('connection', function(socket){
 
 	var currentPlayer = {};
 	currentPlayer.name = 'unknown';
-
-	/*带Log写法
-	socket.join('237', function(){
-    	console.log('rooms: ' + socket.rooms); // [ <socket.id>, 'room 237' ]
-    	io.to('237', 'a new user has joined the room'); // broadcast to everyone in the room
-    });
-	*/
 
 	socket.on('player connect',function()
 	{
@@ -41,12 +35,7 @@ io.on('connection', function(socket){
 			console.log(currentPlayer.name+' emit: other player connected: '+JSON.stringify(playerConnected));
 		}
 	});
-	/*
-	socket.emit('message',{hello:'world'});
-	socket.on('message',function(data){
-		console.log(data);
-	});
-	*/
+
 	socket.on('play',function(data){
 		console.log(currentPlayer.name+' recv: play: '+JSON.stringify(data));
 		// if this is the first person to join the game init the enemies
@@ -95,7 +84,14 @@ io.on('connection', function(socket){
 		console.log("在线用户 " + clients.length);
 
 		//附上名字，用于私聊
-		socket.name = currentPlayer.name;
+		//socket.name = currentPlayer.name;
+		console.log("该用户是 " + socket.id + ',' + socket.name);
+
+		var bask = {
+			id: socket.id,
+			name: data.name
+		}
+		basket.push(bask);
 	});
 	
 	socket.on('player move',function(data){
@@ -165,20 +161,22 @@ io.on('connection', function(socket){
 		console.log(currentPlayer.name +' recv: message: '+JSON.stringify(data));
 		console.log('id: ' + socket.id + ', name ' + socket.name);
 		
-		socket.join(data.from + data.to);
-		socket.join(data.to + data.from);
-
 		if(data.from === currentPlayer.name)
 		{
-			console.log(' ===yes=== ');
 			var response = {
 				from: data.from,
 				to: data.to,
 				message: data.message,
 			};
-			socket.emit('chat', response); //仅发送者自己可见
-			//socket.broadcast.emit('chat',response); //除了发送者自己，全体可见
-			socket.broadcast.to(data.from + data.to).to(data.to + data.from).emit('chat',response); //创建了2个room，这里还存在问题
+			socket.emit('chat', response); //回调，发给自己看
+			console.log('发送给: ' + data.to);
+			for(var i = 0; i < basket.length; i++)
+			{
+				if(basket[i].name === data.to)
+				{
+					io.to(basket[i].id).emit('chat', response);
+				}
+			}
 		}
 	});
 
